@@ -31,66 +31,78 @@ class SensorData:
 
 
     def readPms(self):
-        pmsData = self.pms5003.read()
-
-        pm1_0 = pmsData.pm_ug_per_m3(1.0)
-        pm2_5 = pmsData.pm_ug_per_m3(2.5)
-        pm10 = pmsData.pm_ug_per_m3(10)
-        
-        data = {
-            "PM1_0": pm1_0,
-            "PM2_5": pm2_5,
-            "PM10": pm10
-        }
-
-        return data
+	try:
+	        pmsData = self.pms5003.read()
+	
+	        pm1_0 = pmsData.pm_ug_per_m3(1.0)
+	        pm2_5 = pmsData.pm_ug_per_m3(2.5)
+	        pm10 = pmsData.pm_ug_per_m3(10)
+	        
+	        data = {
+	            "PM1_0": pm1_0,
+	            "PM2_5": pm2_5,
+	            "PM10": pm10
+	        }
+	
+	        return data
+	except Exception as e:
+		logging.error(f"An error occurred when reading PMS data: {e}")
 
     def sendPms(self, data):
-	if not data or not all(k in data for k in ("PM1_0", "PM2_5", "PM10")):
-                logging.error("PMS data is missing or incomplete.")
-                return
-	    
-        endpoint = self.api_endpoint + "/pms5003"
-
-        response = requests.post(url=endpoint, data=data)
-
-	if response.status_code != 200:
-                logging.error(f"Failed to send PMS data, status code: {response.status_code}")
-		
-        return response.status_code
+	try:
+		if not data or not all(k in data for k in ("PM1_0", "PM2_5", "PM10")):
+	                logging.error("PMS data is missing or incomplete.")
+	                return
+		    
+	        endpoint = self.api_endpoint + "/pms5003"
+	
+	        response = requests.post(url=endpoint, data=data)
+	
+		if response.status_code != 200:
+	                logging.error(f"Failed to send PMS data, status code: {response.status_code}")
+			
+	        return response.status_code
+	except Exception as e:
+		logging.error(f"An error occurred when sending PMS data: {e}")
         
-	def readBme(self, num_readings=5, delay=2):
-        temp, humidity, pressure, altitude = 0.0, 0.0, 0.0, 0.0
-
-        for _ in range(num_readings):
-            temp = "%0.1f" % self.bme680.temperature
-            humidity = "%0.1f" % self.bme680.relative_humidity
-            pressure = "%0.3f" % self.bme680.pressure
-            altitude = "%0.2f" % self.bme680.altitude
-            time.sleep(delay)
-
-        data = {
-            'Temperature': temp,
-            'Pressure': pressure,
-            'Humidity': humidity,
-            'Altitude': altitude
-        }
-
-        return data 
+    def readBme(self, num_readings=5, delay=2):
+	try:
+		temp, humidity, pressure, altitude = 0.0, 0.0, 0.0, 0.0
+		
+		for _ in range(num_readings):
+		    temp = "%0.1f" % self.bme680.temperature
+		    humidity = "%0.1f" % self.bme680.relative_humidity
+		    pressure = "%0.3f" % self.bme680.pressure
+		    altitude = "%0.2f" % self.bme680.altitude
+		    time.sleep(delay)
+	
+		data = {
+		    'Temperature': temp,
+		    'Pressure': pressure,
+		    'Humidity': humidity,
+		    'Altitude': altitude
+		}
+	
+		return data
+	except Exception as e:
+		logging.error(f"An error occurred when reading BME data: {e}")
 
     def sendBme(self, data):
-	if not data or not all(k in data for k in ("Temperature", "Pressure", "Humidity", "Altitude")):
-            logging.error("BME data is missing or incomplete.")
-            return
-	
-	endpoint = self.api_endpoint + "/bme680"
-
-	response = requests.post(url=endpoint, data=data)
-	
-	if response.status_code != 200:
-        	logging.error(f"Failed to send BME data, status code: {response.status_code}")
+	try:
+		if not data or not all(k in data for k in ("Temperature", "Pressure", "Humidity", "Altitude")):
+	            logging.error("BME data is missing or incomplete.")
+	            return
 		
-	return response.status_code
+		endpoint = self.api_endpoint + "/bme680"
+	
+		response = requests.post(url=endpoint, data=data)
+		
+		if response.status_code != 200:
+	        	logging.error(f"Failed to send BME data, status code: {response.status_code}")
+			
+		return response.status_code
+	except Exception as e:
+		logging.error(f"An error occurred when sending BME data: {e}")
 
 
 sensor_data = SensorData()
