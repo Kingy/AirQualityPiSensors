@@ -3,12 +3,18 @@ import os
 import requests
 import board
 import time
+import logging
 
 import adafruit_bme680
 from pms5003 import PMS5003
 from dotenv import load_dotenv
 
 load_dotenv()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+log_file_path = os.path.join(script_dir, 'error.log')
+
+logging.basicConfig(filename=log_file_path, level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s')
 
 class SensorData:
     def __init__(self):
@@ -40,9 +46,17 @@ class SensorData:
         return data
 
     def sendPms(self, data):
+	if not data or not all(k in data for k in ("PM1_0", "PM2_5", "PM10")):
+                logging.error("PMS data is missing or incomplete.")
+                return
+	    
         endpoint = self.api_endpoint + "/pms5003"
 
         response = requests.post(url=endpoint, data=data)
+
+	if response.status_code != 200:
+                logging.error(f"Failed to send PMS data, status code: {response.status_code}")
+		
         return response.status_code
         
 	def readBme(self, num_readings=5, delay=2):
@@ -65,10 +79,18 @@ class SensorData:
         return data 
 
     def sendBme(self, data):
-		endpoint = self.api_endpoint + "/bme680"
+	if not data or not all(k in data for k in ("Temperature", "Pressure", "Humidity", "Altitude")):
+            logging.error("BME data is missing or incomplete.")
+            return
+	
+	endpoint = self.api_endpoint + "/bme680"
 
-		response = requests.post(url=endpoint, data=data)
-		return response.status_code
+	response = requests.post(url=endpoint, data=data)
+	
+	if response.status_code != 200:
+        	logging.error(f"Failed to send BME data, status code: {response.status_code}")
+		
+	return response.status_code
 
 
 sensor_data = SensorData()
