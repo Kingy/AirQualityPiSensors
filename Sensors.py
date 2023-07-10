@@ -5,7 +5,9 @@ import board
 import time
 import logging
 
+from adafruit_extended_bus import ExtendedI2C as I2C
 import adafruit_bme680
+
 from pms5003 import PMS5003
 from dotenv import load_dotenv
 
@@ -25,10 +27,17 @@ class SensorData:
                 pin_enable=22,
                 pin_reset=27
                 )
-        i2c = board.I2c()
-        self.bme680 = adafruit_bme680.Adafruit_BME680_I2C(i2c, os.getenv("I2C_ADDR"))
-        self.bme680.sea_level_pressure = 1002.25
+        i2c = I2C(1)
 
+        addr = os.getenv("I2C_ADDR")
+
+        i2caddr = 0x77
+
+        if addr == "0x76":
+            i2caddr = 0x76
+
+        self.bme680 = adafruit_bme680.Adafruit_BME680_I2C(i2c, i2caddr)
+        self.bme680.sea_level_pressure = 1002.25
 
     def readPms(self):
         try:
@@ -108,9 +117,7 @@ class SensorData:
 sensor_data = SensorData()
 
 pms_data = sensor_data.readPms()
-print(pms_data)
 #sensor_data.sendPms(pms_data)
 
 bme_data = sensor_data.readBme()
-print(bme_data)
 #sensor_data.sendBme(bme_data)
