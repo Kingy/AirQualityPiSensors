@@ -3,6 +3,7 @@ adafruit-circuitpython-bme680==3.5.0
 adafruit-circuitpython-busdevice==5.2.6
 adafruit-circuitpython-requests==1.14.1
 adafruit-circuitpython-typing==1.9.4
+adafruit-extended-bus==1.0.2
 Adafruit-PlatformDetect==3.46.0
 Adafruit-PureIO==1.1.11
 board==1.0
